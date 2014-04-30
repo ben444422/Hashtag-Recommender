@@ -36,17 +36,17 @@ hashtags_sought = ['#surprised', '#calm', '#sad', '#happy', '#relieved',
 #for hashtag in hashtags_sought:
     #for found_tweet in tweepy.Cursor(api.search, hashtag).items(2):
         # Ensure it's not a retweet
+tweet_index = 0
 with open('tweets.txt', 'w') as f:
     for hashtag in hashtags_sought:
         for found_tweet in tweepy.Cursor(api.search, hashtag).items(2):
             if not re.search('RT',found_tweet.text) and not re.search('\n', found_tweet.text):
                 #cur.execute(sql_instruction, (found_tweet.id_str, found_tweet.text))
-                encoded = found_tweet.text.encode('utf-8')
-                decoded = encoded.decode('utf-8')
-                print 'hi'
-                print found_tweet.id_str
-                print found_tweet.text
-                f.write(found_tweet.id_str + " x " + decoded + '\n')
+                tweet_encoded = found_tweet.text.encode('utf-8')
+                print "Grabbing Tweet: " + str(tweet_index)
+                print "Tweet Body: " + tweet_encoded
+                tweet_index = tweet_index + 1
+                f.write(found_tweet.id_str.encode('utf-8') + " x " + tweet_encoded + '\n')
 
 #conn.commit()
 
