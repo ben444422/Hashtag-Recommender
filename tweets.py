@@ -41,20 +41,12 @@ with open('tweets.txt', 'w') as f:
         for found_tweet in tweepy.Cursor(api.search, hashtag).items(2):
             if not re.search('RT',found_tweet.text) and not re.search('\n', found_tweet.text):
                 #cur.execute(sql_instruction, (found_tweet.id_str, found_tweet.text))
-                #try:
-                #    found_tweet.text.decode('ascii')
-                #except UnicodeDecodeError, UnicodeEncodeError:
-                #    print 'chupe'
-                #found_tweet_text_decoded = found_tweet.text.encode('utf-8')
-                #else:
                 encoded = found_tweet.text.encode('utf-8')
                 decoded = encoded.decode('utf-8')
                 print 'hi'
                 print found_tweet.id_str
-                #print found_tweet_text_decoded
                 print found_tweet.text
                 f.write(found_tweet.id_str + " x " + decoded + '\n')
-                #f.write(found_tweet.id_str + "x " + found_tweet.text + '\n')
 
 #conn.commit()
 
