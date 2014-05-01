@@ -1,8 +1,10 @@
 # hash tag recommendation based on latent dirichlet allocation
+# work in progress, things will be finalized when the tweet database is available
 import sys
 import gensim
 from pprint import pprint
 from gensim import corpora, models, similarities
+
 print "f"
 documents = []
 for line in sys.stdin:
