@@ -1,10 +1,16 @@
+###########
+#
+#
+# Use the twitter api to get tweets for hashtags and puts them in the database. 
+#
+#
+###########
 import tweepy
 import re
 import sys
 import psycopg2
 import string
 from pprint import pprint
-#import psycopg2
 
 
 def validate(tweet):
@@ -131,9 +137,11 @@ for hashtag in hashtags:
 conn.close()	
 
 
+
+
+
+
 ### IGNORE THIS STUFF. This was just the code to create the tables
-
-
 # CREATE TABLE hashtag(
 # hashtag_id   text PRIMARY KEY
 # );

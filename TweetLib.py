@@ -1,5 +1,17 @@
 # Library to get tweets from the database
 # THIS IS NOT THE FILE THAT GETS TWEETS FROM THE TWITTER API
+###########
+#
+# Example Usage:
+# 
+# from TweetLib import TweetLib
+# tl = TweetLib()
+# top_40_hashtags = tl.get_top_hashtags(40)
+# 
+# tweets = get_tweets("calm", 20)
+#
+###########
+
 import psycopg2
 import operator
 from pprint import pprint
@@ -51,6 +63,6 @@ class TweetLib:
 		return [tweet[0] for tweet in tweets]
 
 
-tl= TweetLib()
+#tl= TweetLib()
 #pprint(tl.get_top_hashtags(30))
-pprint(tl.get_tweets("peaceful", 10))
+#pprint(tl.get_tweets("peaceful", 10))
