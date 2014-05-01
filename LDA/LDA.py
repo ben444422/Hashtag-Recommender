@@ -11,7 +11,7 @@ for line in sys.stdin:
 
 stoplist = set('for a of the and to in'.split())
 texts = [[word for word in document.lower().split() if word not in stoplist] for document in documents]	 
-print texts
+print texts	
 
 dictionary = corpora.Dictionary(texts)
 print dictionary
