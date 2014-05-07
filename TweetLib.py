@@ -40,18 +40,17 @@ class TweetLib:
 	# This function may be particularly expensive so don't call it too much
 	def get_top_hashtags(self, num_hashtags):
 		self.open_db()
-		self.cursor.execute("SELECT hashtag_id from hashtag")
-		hashtags = list(self.cursor.fetchall())
-		hashtag_counts = {}
-		for hashtag in hashtags:
-			hashtag_id = hashtag[0]
-			self.cursor.execute("SELECT COUNT(*) from hashtag_tweet where hashtag_id=%s", (hashtag_id,))
-			count = int(self.cursor.fetchone()[0])
-			hashtag_counts[hashtag_id] = count
-		hashtag_counts = sorted(hashtag_counts.iteritems(), key = operator.itemgetter(1))
-		hashtag_counts.reverse()
+		self.cursor.execute("""select count(hashtag_tweet.hashtag_id) as hashtag_count,
+							hashtag.hashtag_id
+							from 
+							hashtag left join hashtag_tweet on hashtag.hashtag_id = hashtag_tweet.hashtag_id
+							group by
+							hashtag_tweet.hashtag_id,
+							hashtag.hashtag_id
+							order by hashtag_count desc""")
+		hashtags = [(b, int(a)) for (a,b) in list(self.cursor.fetchall())[:num_hashtags]]
 		self.close_db()
-		return hashtag_counts[:num_hashtags]
+		return hashtags
 
 	# get [num_tweets] tweets for a specific hashtag			
 	def get_tweets(self, hashtag, num_tweets):

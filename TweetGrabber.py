@@ -10,7 +10,9 @@ import re
 import sys
 import psycopg2
 import string
+import time
 from pprint import pprint
+from random import shuffle
 
 
 def validate(tweet):
@@ -62,7 +64,7 @@ DB_SETTINGS = {
 }
 
 # the number of tweets to get per hashtag in hashtags_sought
-TWEETS_PER_HASHTAG = 50
+TWEETS_PER_HASHTAG = 10
 
 # the minimum number of non hashtag words
 MIN_WORDS = 5
@@ -73,6 +75,7 @@ hashtags = ['surprised', 'calm', 'sad', 'happy', 'relieved',
 'optimistic', 'loved', 'lonely', 'hyper', 'hungry',
 'frustrated', 'exhausted', 'envious', 'drained', 'dark',
 'crazy', 'curious', 'content', 'cheerful', 'annoyed']
+shuffle(hashtags)
 #####################################
 
 # Handle authorization with given info, connect to API
@@ -92,48 +95,58 @@ cur = conn.cursor()
 
 # index of the tweet grabbed. for debugging 
 tweet_index = 0
-for hashtag in hashtags:
-	for tweet in tweepy.Cursor(api.search, "#" + hashtag).items(TWEETS_PER_HASHTAG):		
-		#check if the tweet already exists. If it does don't do anything
-		tweet_id = str(tweet.id)
-		sql_tweet_check = "SELECT count(*) from tweet where tweet_id=%s"
-		cur.execute(sql_tweet_check,(tweet_id,))
-		if int(cur.fetchone()[0]) > 0:
+
+
+while True:
+	for hashtag in hashtags:
+		try:
+			tweets_found = tweepy.Cursor(api.search, "#" + hashtag).items(TWEETS_PER_HASHTAG)
+			for tweet in tweets_found:		
+				#check if the tweet already exists. If it does don't do anything
+				tweet_id = str(tweet.id)
+				sql_tweet_check = "SELECT count(*) from tweet where tweet_id=%s"
+				cur.execute(sql_tweet_check,(tweet_id,))
+				if int(cur.fetchone()[0]) > 0:
+					continue
+
+				if validate(tweet):
+					print "Grabbing Tweet: " + str(tweet_index) + " for hashtag: " + hashtag
+					print "Tweet Body: " + tweet.text	
+					tweet_index = tweet_index + 1
+					(tweet_hashtags, tweet_body, tweet_body_count) = separate(clean_tweet(tweet.text))
+					print tweet_hashtags
+					print tweet_body
+					print "=============================="
+
+					if tweet_body_count < MIN_WORDS:
+						continue
+
+					# create an entry for the tweet in the tweet table
+					sql_tweet = "INSERT INTO tweet (tweet_id, tweet_body) VALUES (%s, %s)"
+					cur.execute(sql_tweet, (tweet_id, tweet_body))
+
+					for tweet_hashtag in tweet_hashtags:
+						sql_check = "SELECT count(*) from hashtag where hashtag_id=%s"
+						cur.execute(sql_check,(tweet_hashtag,))
+						# Check if the hashtag table has an entry for this hashtag, if not make an entry
+						if int(cur.fetchone()[0]) == 0:
+							# create an entry in the hashtag table
+							sql_hashtag = "INSERT INTO hashtag (hashtag_id) VALUES (%s)"
+							cur.execute(sql_hashtag, (tweet_hashtag,))	
+						conn.commit()
+						# Create the association in the hashtag_tweet table
+						sql_hashtag_tweet = "INSERT INTO hashtag_tweet (hashtag_id, tweet_id) VALUES (%s,%s)"
+						try:
+							cur.execute(sql_hashtag_tweet, (tweet_hashtag, tweet_id))
+						except psycopg2.IntegrityError:
+							conn.rollback()
+						else:
+							conn.commit()
+		except tweepy.error.TweepError:
+			print "Rate Limited Sleeping..."
+			time.sleep(5)
 			continue
 
-		if validate(tweet):
-			print "Grabbing Tweet: " + str(tweet_index) + " for hashtag: " + hashtag
-			print "Tweet Body: " + tweet.text	
-			tweet_index = tweet_index + 1
-			(tweet_hashtags, tweet_body, tweet_body_count) = separate(clean_tweet(tweet.text))
-			print tweet_hashtags
-			print tweet_body
-			print "=============================="
-
-			if tweet_body_count < MIN_WORDS:
-				continue
-
-			# create an entry for the tweet in the tweet table
-			sql_tweet = "INSERT INTO tweet (tweet_id, tweet_body) VALUES (%s, %s)"
-			cur.execute(sql_tweet, (tweet_id, tweet_body))
-
-			for tweet_hashtag in tweet_hashtags:
-				sql_check = "SELECT count(*) from hashtag where hashtag_id=%s"
-				cur.execute(sql_check,(tweet_hashtag,))
-				# Check if the hashtag table has an entry for this hashtag, if not make an entry
-				if int(cur.fetchone()[0]) == 0:
-					# create an entry in the hashtag table
-					sql_hashtag = "INSERT INTO hashtag (hashtag_id) VALUES (%s)"
-					cur.execute(sql_hashtag, (tweet_hashtag,))	
-				conn.commit()
-				# Create the association in the hashtag_tweet table
-				sql_hashtag_tweet = "INSERT INTO hashtag_tweet (hashtag_id, tweet_id) VALUES (%s,%s)"
-				try:
-					cur.execute(sql_hashtag_tweet, (tweet_hashtag, tweet_id))
-				except psycopg2.IntegrityError:
-					conn.rollback()
-				else:
-					conn.commit()
 conn.close()	
 
 
