@@ -57,11 +57,11 @@ class TweetLib:
 		self.open_db()
 		hashtag_id = hashtag.lower()
 		self.cursor.execute("SELECT tweet.tweet_body FROM tweet INNER JOIN hashtag_tweet as ht ON ht.tweet_id = tweet.tweet_id WHERE ht.hashtag_id = %s", (hashtag_id,))
-		tweets = list(self.cursor.fetchall())
+		tweets = list(self.cursor.fetchall())[:num_tweets]
 		self.close_db()
 		return [tweet[0] for tweet in tweets]
 
 
-#tl= TweetLib()
-#pprint(tl.get_top_hashtags(30))
+# tl= TweetLib()
+# pprint(tl.get_top_hashtags(30))
 #pprint(tl.get_tweets("peaceful", 10))
