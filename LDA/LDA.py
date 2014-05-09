@@ -6,6 +6,9 @@ from pprint import pprint
 from gensim import corpora, models, similarities
 from nltk.corpus import stopwords
 from random import shuffle
+import math
+import numpy as np
+import matplotlib.pyplot as plt
 from operator import itemgetter
 sys.path.append("..")
 from TweetLib import TweetLib
@@ -13,17 +16,20 @@ from TweetLib import TweetLib
 
 ############### PARAMETERS ##################
 
-hashtags = ['surprised', 'calm', 'sad', 'happy', 'relieved',
+default_hashtags = ['surprised', 'calm', 'sad', 'happy', 'relieved',
 'restless', 'thankful', 'weird', 'peaceful', 'relaxed',
 'optimistic', 'loved', 'lonely', 'hyper', 'hungry',
 'frustrated', 'exhausted', 'envious', 'drained', 'dark',
-'crazy', 'curious', 'content', 'cheerful', 'annoyed']
+'crazy', 'curious', 'content', 'cheerful', 'annoyed', ""]
 
-#hashtags = ['sad', 'followmeaustin']
 
 TWEETS_PER_HASHTAG = 1000
-NUM_TOPICS = 4
-TWEETS_PER_DOC = 10
+
+TWEETS_PER_DOC = 5
+NUM_HASHTAGS = 10
+NUM_TOPICS = int(NUM_HASHTAGS*1.5)
+stopwords = stopwords.words('english') + ['i\'m', 'it\'s', '&amp', 'get', '&amp;', '-',',']
+
 #############################################
 
 
@@ -37,18 +43,34 @@ def combine_tweets(docs, tweets_per):
 	for ind in xrange(len(docs)):
 		new_docs[indices[ind]] = new_docs[indices[ind]] + " " + docs[ind]
 	return new_docs
-
+	
+def lda_to_vec(lda, tot):
+	vec = [0]*tot
+	for q in lda:
+		vec[q[0]] = q[1]
+	return np.asarray(vec)
 
 tl = TweetLib()
+
+
+top_hashtags = tl.get_top_hashtags(len(default_hashtags))
+shuffle(top_hashtags)
+
+#top_hashtags = [w for w in top_hashtags if w[0] not in default_hashtags]
+top_hashtags = top_hashtags[:NUM_HASHTAGS]
+print top_hashtags
+TWEETS_PER_HASHTAG = min([b for a,b in top_hashtags])
+
+hashtags = [a for a,b in top_hashtags]
+
 
 documents = []
 hashtags_docs = {}
 for hashtag in hashtags:
 	docs = tl.get_tweets(hashtag, TWEETS_PER_HASHTAG)
-	docs = [" ".join([word for word in d.lower().split() if word not in stopwords.words('english')]) for d in docs]
+	docs = [" ".join([word for word in d.lower().split() if word not in stopwords]) for d in docs]
 	docs = combine_tweets(docs, TWEETS_PER_DOC)
 	hashtags_docs[hashtag] = docs
-	#documents.append(" ".join(tl.get_tweets(hashtag, TWEETS_PER_HASHTAG)))
 	documents = documents + docs
 
 print len(documents)
@@ -61,23 +83,71 @@ corpus = [dictionary.doc2bow(text) for text in texts]
 #print(corpus)
 #print dictionary.token2id
 id2tok = {v:k for k, v in dictionary.token2id.items()}
-lda = gensim.models.ldamodel.LdaModel(corpus=corpus, id2word=id2tok, num_topics=NUM_TOPICS, update_every=1, chunksize=10000, passes=1)
-pprint(lda.print_topics(20))
+lda = gensim.models.ldamodel.LdaModel(corpus=corpus, id2word=id2tok, num_topics=NUM_TOPICS, update_every=1, chunksize=10000, passes=2)
 
-doc_lda = lda[dictionary.doc2bow("delighted wonderful great good".split())]
+for i,t in enumerate(lda.print_topics(NUM_TOPICS)):
+	print "Topic " + str(i)
+	print t
 
-print doc_lda
 
-for hashtag in hashtags:
-	topic_tally = [0]*NUM_TOPICS
+plt.tick_params(
+    axis='y',          
+    which='both',     
+    bottom='off',      
+    top='off',         
+    labelbottom='off')
+
+made = False
+hashtag_vecs = {}
+for i, hashtag in enumerate(hashtags):
+	hashtag_vec = np.asarray([0]*NUM_TOPICS)
+
+
 	for doc in hashtags_docs[hashtag]:
 		doc_lda = lda[dictionary.doc2bow(doc.split())]
-		top_topic = max(doc_lda,key=itemgetter(1))[0]
-		topic_tally[top_topic] = topic_tally[top_topic] + 1
-	tot = float(sum(topic_tally))
-	topic_ratios = [float(v)/tot for v in topic_tally]
+		doc_vec = lda_to_vec(doc_lda, NUM_TOPICS)
+		hashtag_vec = hashtag_vec + doc_vec
+
+	tot = np.sum(hashtag_vec)
+	topic_ratios = hashtag_vec/tot
+	#topic_ratios = tuple([float(v)/tot for v in topic_tally])
+	hashtag_vecs[hashtag] = topic_ratios
+
 	print "topic ratios for: " + hashtag
 	pprint(topic_ratios)
+	plot_pos = int(math.ceil(NUM_HASHTAGS/2.0)*100 + 20 + i)
+	fig = plt.subplot(plot_pos)
+	p = plt.bar(np.arange(NUM_TOPICS), topic_ratios, 0.2,
+		alpha=0.4,
+		color='b',
+		label='Men')
+	fig.xaxis.set_visible(True)
+	fig.yaxis.set_visible(False)
+	plt.title('#' + hashtag)
+
+
+doc_lda = lda[dictionary.doc2bow("delighted wonderful great good".split())]
+print doc_lda	
+doc_vec = np.asarray(tuple([b for a,b in doc_lda]))
+
+min_dist = float("inf")
+min_hashtag = None
+for hashtag in hashtag_vecs:
+	dist = np.linalg.norm(doc_vec - np.asarray(hashtag_vecs[hashtag]))
+	if dist < min_dist:
+		min_dist = dist
+		min_hashtag = hashtag
+
+
+
+print "best hashtag: #" + min_hashtag
+
+
+
+plt.show()
+
+
+
 
 
 

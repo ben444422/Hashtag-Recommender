@@ -62,6 +62,8 @@ class TweetLib:
 		return [tweet[0] for tweet in tweets]
 
 
-# tl= TweetLib()
-# pprint(tl.get_top_hashtags(30))
-#pprint(tl.get_tweets("peaceful", 10))
+if __name__ == "__main__":
+	tl= TweetLib()
+	pprint(tl.get_top_hashtags(30))
+	pprint(tl.get_tweets("peaceful", 10))
+

@@ -119,6 +119,7 @@ class StreamWatcherHandler(tweepy.StreamListener):
 			conn.rollback()
 		else:
 			conn.commit()
+			pass
 
 	def on_error(self, status_code):
 		print('An error has occured! Status code = %s' % status_code)
@@ -137,9 +138,13 @@ def main():
 	print "Establishing stream...",
 	stream = tweepy.Stream(auth1, StreamWatcherHandler(), timeout=None)
 	print "Done"
-
-	# Start pulling our sample streaming API from Twitter to be handled by StreamWatcherHandler
-	stream.sample()
+	while True:
+		try:
+		# Start pulling our sample streaming API from Twitter to be handled by StreamWatcherHandler
+			stream.sample()
+		except:
+			print >> sys.stderr, sys.exc_info()
+			continue
 
 if __name__ == '__main__':
 	try:
