@@ -36,9 +36,9 @@ handles.append(pl.scatter(num_hashtags, error_rates, c="blue"))
 handles.append(pl.scatter(num_hashtags, default_rates, c="red"))
 pl.legend(handles, ["Error Rate for LDA", "Error Rate from Random Guessing"], loc=4)
 
-pl.set_title("Error Rate vs. Number of Hashtags Used")
+pl.set_title("Error Rate vs. Number of Hashtags in Classifier")
 pl.set_ylabel("Error Rate")
-pl.set_xlabel("Number of Hashtags Used")
+pl.set_xlabel("Number of Hashtags in Classifier")
 plt.show()
 
 

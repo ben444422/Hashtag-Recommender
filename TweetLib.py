@@ -62,6 +62,17 @@ class TweetLib:
 		return [tweet[0] for tweet in tweets]
 
 
+	#get [num_tweets] random tweets from the database
+	# returns a list of tuples where each tuple is ([hashtag], [tweet body])
+	def get_random_tweets(self, num_tweets):
+		self.open_db()
+		tweets = []
+
+		self.cursor.execute("SELECT * FROM tweet LIMIT %s", (num_tweets,))
+		
+
+
+		self.close_db
 if __name__ == "__main__":
 	tl= TweetLib()
 	pprint(tl.get_top_hashtags(30))

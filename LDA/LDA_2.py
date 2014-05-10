@@ -113,7 +113,7 @@ for i in list(range(3, 31)):
 
 
 		print "Number of Documents: " + str(len(documents))
-
+		
 		texts = [[word for word in document.split()] for document in documents]
 
 		dictionary = corpora.Dictionary(texts)
