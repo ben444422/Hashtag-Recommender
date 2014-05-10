@@ -40,6 +40,18 @@ class TweetLib:
 	# This function may be particularly expensive so don't call it too much
 	def get_top_hashtags(self, num_hashtags):
 		self.open_db()
+		self.cursor.execute("""SELECT hashtag FROM top_hashtags ORDER BY ranking """)
+		hashtags = [a[0] for a in list(self.cursor.fetchall())[:num_hashtags]]
+		self.close_db()
+		return hashtags
+
+	def update_top_hashtags(self):
+		self.open_db()
+
+		print "Clearing top_hashtags database..."
+		self.cursor.execute("DELETE FROM top_hashtags")
+
+		print "Getting top hashtags..."
 		self.cursor.execute("""select count(hashtag_tweet.hashtag_id) as hashtag_count,
 							hashtag.hashtag_id
 							from 
@@ -48,9 +60,15 @@ class TweetLib:
 							hashtag_tweet.hashtag_id,
 							hashtag.hashtag_id
 							order by hashtag_count desc""")
-		hashtags = [(b, int(a)) for (a,b) in list(self.cursor.fetchall())[:num_hashtags]]
+
+		hashtags = [b for (a,b) in list(self.cursor.fetchall())]
+		print "Inserting top hashtags..."
+		for i, hashtag in enumerate(hashtags):
+			self.cursor.execute("INSERT INTO top_hashtags (ranking, hashtag) VALUES (%s,%s)", (int(i+1), hashtag))
+			self.conn.commit()
+
 		self.close_db()
-		return hashtags
+
 
 	# get [num_tweets] tweets for a specific hashtag			
 	def get_tweets(self, hashtag, num_tweets):
@@ -62,19 +80,13 @@ class TweetLib:
 		return [tweet[0] for tweet in tweets]
 
 
-	#get [num_tweets] random tweets from the database
-	# returns a list of tuples where each tuple is ([hashtag], [tweet body])
-	def get_random_tweets(self, num_tweets):
-		self.open_db()
-		tweets = []
 
-		self.cursor.execute("SELECT * FROM tweet LIMIT %s", (num_tweets,))
-		
 
 
 		self.close_db
 if __name__ == "__main__":
 	tl= TweetLib()
-	pprint(tl.get_top_hashtags(30))
-	pprint(tl.get_tweets("peaceful", 10))
+	tl.update_top_hashtags()
+	pprint(tl.get_top_hashtags(10))
+#	pprint(tl.get_top_hashtags(30))
 
