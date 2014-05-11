@@ -6,7 +6,7 @@ from pprint import pprint
 sys.path.append("..")
 from TweetLib import TweetLib
 
-
+  
 def get_folds(data, num_folds):
 	indices = list(xrange(num_folds))*(int((len(data)/num_folds)) + 1)
 	indices = indices[:len(data)]
