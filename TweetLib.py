@@ -80,9 +80,6 @@ class TweetLib:
 		return [tweet[0] for tweet in tweets]
 
 
-
-
-
 		self.close_db
 if __name__ == "__main__":
 	tl= TweetLib()
