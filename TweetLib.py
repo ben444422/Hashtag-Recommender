@@ -86,7 +86,7 @@ class TweetLib:
 		self.close_db
 if __name__ == "__main__":
 	tl= TweetLib()
-	tl.update_top_hashtags()
+	#tl.update_top_hashtags()
 	pprint(tl.get_top_hashtags(10))
 #	pprint(tl.get_top_hashtags(30))
 

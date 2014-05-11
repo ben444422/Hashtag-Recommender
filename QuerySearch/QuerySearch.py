@@ -24,7 +24,7 @@ def get_folds(data, num_folds):
 	return folds
 
 
-def get_hashtags():
+def get_hashtags():`
 	tl = TweetLib()
 	return tl.get_top_hashtags(500)
 
