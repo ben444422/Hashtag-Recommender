@@ -37,7 +37,7 @@ class HashtagDocumenter:
 	def add_hashtag_documents(self, start_from=0):
 		self.open_db()
 		tl = TweetLib()
-		top_hashtags = tl.get_top_hashtags(15000)
+		top_hashtags = tl.get_top_hashtags(50000)
 		top_hashtags= top_hashtags[start_from:]
 		
 		index = 0
@@ -45,7 +45,7 @@ class HashtagDocumenter:
 			print "Adding " + str(index) + " Document for: " + hashtag
 			index = index + 1
 
-			tweets = tl.get_tweets(hashtag, 10000)
+			tweets = tl.get_tweets(hashtag, 1000000)
 			document = " ".join(tweets)
 			# check if the hashtag already exists in the database
 			self.cursor.execute("SELECT count(*) FROM tweetdocument WHERE hashtag_id=%s", (hashtag,))
@@ -61,4 +61,4 @@ class HashtagDocumenter:
 
 if __name__ == "__main__":
 	hd = HashtagDocumenter()
-	hd.add_hashtag_documents()
+	hd.add_hashtag_documents(start_from=0)

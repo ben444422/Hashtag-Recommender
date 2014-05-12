@@ -64,7 +64,7 @@ if __name__ == "__main__":
 	# print rqs.recommend("cry crying")
 
 	# run k-folds on this bitch
-
+	
 	tl = TweetLib()
 	for i in xrange(len(top_hashtags) - 2):
 		hashtags = top_hashtags[:i+2]
