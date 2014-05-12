@@ -3,8 +3,6 @@
 from collections import defaultdict
 from math import sqrt
 import random
-from vocab import Vocab
-import glob
 
 def densify(x, n):
     """Convert a sparse vector to a dense one."""
@@ -53,8 +51,6 @@ def kmeans(k, xs, l, n_iter=10):
             members = (x for i, x in enumerate(xs) if cluster[i] == j)
             centers[j] = mean(members, l)
 
-    print centers
-
     return cluster
 
 
@@ -75,10 +71,7 @@ if __name__ == '__main__':
     if len(sys.argv) < 1 + k:
         usage()
 
-#    vocab = {}
-#    xs = []
-
-    vocab = Vocab.vocab
+    vocab = {}
     xs = []
 
     args = sys.argv[2:]
@@ -90,37 +83,8 @@ if __name__ == '__main__':
                 x[vocab[w]] += 1
         xs.append(x.items())
 
-#    tweet_to_be_classified = sys.argv[2]
-#    x = defaultdict(float)
-#    with open(tweet_to_be_classified) as f:
-#        for w in re.findall(r"\w+", f.read()):
-#            vocab.setdefault(w, len(vocab))
-#            x[vocab[w]] += 1
-#    xs.append(x.items())
 
-    smallest = sys.float_info.max
-    i = 0
-    for center in glob.glob('*.txt'):
-        with open('%s' % center, 'r') as f:
-            contents = f.read()
-            for i, x in enumerate(xs):
-                cluster = min(xrange(k), key=lambda j: dist(xs[i], contents[j]))
-#                for j in len(contents):
-#                    sz = dist(xs[i], contents[j])
-#                    if sz < smallest:
-#                        smallest = sz
-#                        index = i
-#                    i += 1
-
-#    cluster_ind = kmeans(k, xs, len(vocab))
-#    clusters = [set() for _ in xrange(k)]
-#    for i, j in enumerate(cluster_ind):
-#        clusters[j].add(i)
-
-    default_hashtags = ['surprised', 'calm', 'sad', 'happy', 'relieved',
-                'restless', 'thankful', 'weird', 'peaceful', 'relaxed',
-                'optimistic', 'loved', 'lonely', 'hyper', 'hungry',
-                'frustrated', 'exhausted', 'envious', 'drained', 'dark',
-                'crazy', 'curious', 'content', 'cheerful', 'annoyed', ""]
-
-    #print default_hashtags[index]
+    cluster_ind = kmeans(k, xs, len(vocab))
+    clusters = [set() for _ in xrange(k)]
+    for i, j in enumerate(cluster_ind):
+        clusters[j].add(i)
