@@ -94,7 +94,7 @@ for i in list(range(3, 31)):
 		test_documents = f[2]
 
 		#print "Number of Documents: " + str(len(documents))
-
+			
 		all_train_documents = []
 		all_train_classes = []
 		counter = 0
@@ -140,7 +140,7 @@ for i in list(range(3, 31)):
 		#t0 = time()
 		pred = clf.predict(X_test)
 		#print "done in %fs" % (time() - t0)
-
+		
 		#print "Classification report on test set for classifier:"
 		#print clf
 		#print
@@ -157,7 +157,7 @@ for i in list(range(3, 31)):
 			correct += x[i]
 			for c in x:
 				total += c
-
+				
 		#print correct
 		#print total
 		 # Show confusion matrix
@@ -166,7 +166,7 @@ for i in list(range(3, 31)):
 		#pl.colorbar()
 		#######
 		#pl.show()
-
+		
 
 		avg_error_rate = avg_error_rate + ((total-correct)/total)
 		
