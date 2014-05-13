@@ -29,13 +29,9 @@ class RecommenderQS:
 	def recommend(self, tweet):
 		clf = MultinomialNB(**self.parameters).fit(self.xtrain, self.ytrain)
 		xtest = self.vectorizer.transform([tweet])
-		pred = []
+		pred = clf.predict_proba(xtest)[0]
 
-		for i, x in enumerate(clf.predict_proba(xtest)[0]):
-			pred.append((self.hashtags[i], x))
-
-		sortedpred = sorted(pred, key=lambda x:x[1])
-		return list(reversed([i[0] for i in sortedpred]))
+		return list(reversed([self.hashtags[i[0]] for i in sorted(enumerate(pred), key=lambda x:x[1])]))
 
 if __name__ == "__main__":
 	rqs = RecommenderQS(num_hashtags=200)
