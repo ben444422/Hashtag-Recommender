@@ -35,8 +35,9 @@ class RecommenderNB:
 			return list(reversed([self.hashtags[i[0]] for i in sorted_pred]))
 
 if __name__ == "__main__":
-	rqs = RecommenderNB(num_hashtags=1000)
-	print rqs.recommend("nf32131231l")
+	rqs = RecommenderNB(num_hashtags=200)
+	print rqs.recommend("nfl")
+
 		
 
 
