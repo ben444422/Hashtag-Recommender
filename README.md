@@ -1,5 +1,4 @@
 # Twitter Hashtag Recommendation
-Everything is still a work in progress
 
 ## Files
 ##### TweetLib.py
